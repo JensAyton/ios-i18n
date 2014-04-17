@@ -33,21 +33,22 @@
 	for (NSString *lang in locales) {
 		const char* form = pluralformf([lang cStringUsingEncoding:NSASCIIStringEncoding], pluralValue);
 		NSString *keyVariant = [NSString stringWithFormat:@"%@##{%s}", key, form];
-		
-		if (tableName.length == 0) {
-			tableName = @"Localizable";
+
+		NSString *langTableName = tableName;
+		if (langTableName.length == 0) {
+			langTableName = @"Localizable";
 		}
-		if (tableName) {
-			tableName = [self pathForResource:tableName ofType:@"strings" inDirectory:nil forLocalization:lang];
+		if (langTableName) {
+			langTableName = [self pathForResource:langTableName ofType:@"strings" inDirectory:nil forLocalization:lang];
 		}
-		if (!tableName) {
+		if (!langTableName) {
 			NSArray *paths = [self pathsForResourcesOfType:@"strings" inDirectory:nil forLocalization:lang];
-			if (paths.count) tableName = paths[0];
+			if (paths.count) langTableName = paths[0];
 		}
 		
 		NSDictionary *dict = nil;
-		if (tableName) {
-			dict = [NSDictionary dictionaryWithContentsOfFile:tableName];
+		if (langTableName) {
+			dict = [NSDictionary dictionaryWithContentsOfFile:langTableName];
 		}
 		
 		NSString *ls = dict[keyVariant];
