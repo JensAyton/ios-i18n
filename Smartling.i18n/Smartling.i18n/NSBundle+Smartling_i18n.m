@@ -29,26 +29,37 @@
 	if (self.developmentLocalization && ![[locales lastObject] isEqualToString:self.developmentLocalization]) {
 		[locales addObject:self.developmentLocalization];
 	}
-	
+
+	if (tableName.length == 0) {
+		tableName = @"Localizable";
+	}
+	if (tableName) {
+		for (NSString *lang in locales) {
+			NSString *newTableName = [self pathForResource:tableName ofType:@"strings" inDirectory:nil forLocalization:lang];
+			if (newTableName != nil) {
+				tableName = newTableName;
+				break;
+			}
+		}
+	}
+	if (!tableName) {
+		for (NSString *lang in locales) {
+			NSArray *paths = [self pathsForResourcesOfType:@"strings" inDirectory:nil forLocalization:lang];
+			if (paths.count) {
+				tableName = paths[0];
+				break;
+			}
+		}
+	}
+
+	NSDictionary *dict = nil;
+	if (tableName) {
+		dict = [NSDictionary dictionaryWithContentsOfFile:tableName];
+	}
+
 	for (NSString *lang in locales) {
 		const char* form = pluralformf([lang cStringUsingEncoding:NSASCIIStringEncoding], pluralValue);
 		NSString *keyVariant = [NSString stringWithFormat:@"%@##{%s}", key, form];
-		
-		if (tableName.length == 0) {
-			tableName = @"Localizable";
-		}
-		if (tableName) {
-			tableName = [self pathForResource:tableName ofType:@"strings" inDirectory:nil forLocalization:lang];
-		}
-		if (!tableName) {
-			NSArray *paths = [self pathsForResourcesOfType:@"strings" inDirectory:nil forLocalization:lang];
-			if (paths.count) tableName = paths[0];
-		}
-		
-		NSDictionary *dict = nil;
-		if (tableName) {
-			dict = [NSDictionary dictionaryWithContentsOfFile:tableName];
-		}
 		
 		NSString *ls = dict[keyVariant];
 		if (ls.length) {
